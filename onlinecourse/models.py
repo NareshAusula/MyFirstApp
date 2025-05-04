@@ -1,12 +1,12 @@
 import sys
-from django.utils.timezone import now
+from django.utils.timezone import now # type: ignore
 try:
-    from django.db import models
+    from django.db import models # type: ignore
 except Exception:
     print("There was an error loading django modules. Do you have django installed?")
     sys.exit()
 
-from django.conf import settings
+from django.conf import settings # type: ignore
 import uuid
 
 
@@ -101,3 +101,52 @@ class Enrollment(models.Model):
 #class Submission(models.Model):
 #    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
 #    choices = models.ManyToManyField(Choice)
+
+# Question model:
+class Question(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    question_text = models.CharField(max_length=200)
+    grade = models.IntegerField(default=0)
+    hint = models.CharField(max_length=500, blank=True)
+    solution = models.CharField(max_length=500, blank=True)
+
+    def is_get_score(self, selected_ids):
+        all_answers = self.choice_set.filter(is_correct=True).count()
+        selected_correct = self.choice_set.filter(is_correct=True, id__in=selected_ids).count()
+        if all_answers == selected_correct:
+            return True
+        else:
+            return False
+    
+    def __str__(self):
+        return self.question_text
+    
+#Choice model
+class Choice(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    choice_text = models.CharField(max_length=200)
+    is_correct = models.BooleanField(default=False)
+    hint = models.CharField(max_length=500, blank=True)
+    solution = models.CharField(max_length=500, blank=True)
+
+    def __str__(self):
+        return self.choice_text
+    
+#Submission model:
+class Submission(models.Model):
+    enrollment = models.ForeignKey(Enrollment,on_delete=models.CASCADE)
+    choices = models.ManyToManyField(Choice)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def get_total_score(self):
+        total = 0
+        for question in self.enrollment.course.question_set.all():
+            selected_ids = [c.id for c in self.choices.filter(question=question)]
+            if question.is_get_score(selected_ids):
+                total += question.grade
+            return total
+
+    def __str__(self):
+        return f"Submission {self.id}"    
+
+

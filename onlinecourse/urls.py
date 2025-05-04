@@ -1,6 +1,7 @@
-from django.urls import path
-from django.conf import settings
-from django.conf.urls.static import static
+from django.urls import path # type: ignore
+from django.conf import settings # type: ignore
+from django.conf.urls.static import static # type: ignore
+from onlinecourse import views
 from . import views
 
 app_name = 'onlinecourse'
@@ -18,7 +19,8 @@ urlpatterns = [
     path('<int:course_id>/enroll/', views.enroll, name='enroll'),
 
     # <HINT> Create a route for submit view
-
+    path('course/<int:course_id>/submit/', views.submit, name='submit'),    
     # <HINT> Create a route for show_exam_result view
+    path('course/<int:course_id>/submission/<int:submission_id>/result/',views.show_exam_result, name='exam_result')
 
  ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -138,7 +138,7 @@ input[type=text]:focus, input[type=password]:focus {
 }
 
 .red{
-    color:red
+    color:rgb(160, 255, 181)
 }
 
 .dropbtn {
